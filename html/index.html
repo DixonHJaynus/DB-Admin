@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DB-Admin</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Cinzel:wght@500;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   DBG ADMIN MENU — "Authority of the Frontier"
+   Dark wood + cream Wild West typography + brass accents
+   ============================================================ */
+
+:root {
+    /* Dark wood / brown background */
+    --bg-deepest:    #1a0e08;
+    --bg-deep:       #261611;
+    --bg-base:       #2e1d15;
+    --bg-mid:        #382318;
+    --bg-light:      #422a1c;
+    --bg-lighter:    #523322;
+
+    /* Cream / paper text */
+    --cream:         #f4e8c8;
+    --cream-bright:  #faf2dc;
+    --cream-soft:    #e0d2a8;
+    --cream-dim:     #b8a888;
+    --cream-faded:   #8a7c64;
+
+    /* Brass / gold accents */
+    --brass:         #b8945a;
+    --brass-bright:  #d4b078;
+    --brass-glow:    #e8c890;
+    --brass-dark:    #8a6a3c;
+    --brass-shadow:  #5a4424;
+
+    /* Danger / accent (close button) */
+    --crimson:       #6e1a18;
+    --crimson-bright:#9a2820;
+    --crimson-deep:  #3a0c0a;
+
+    /* Borders */
+    --border-frame:  #5a3a22;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: transparent;
+    font-family: 'IM Fell English', Georgia, serif;
+    color: var(--cream);
+    user-select: none;
+}
+
+#wrap {
+    position: fixed; top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 9999;
+    background: radial-gradient(ellipse at center, rgba(20, 10, 6, 0.7) 0%, rgba(0, 0, 0, 0.95) 100%);
+    animation: fadeIn 0.25s ease-out;
+}
+#wrap.show { display: flex !important; }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes panelIn {
+    from { opacity: 0; transform: scale(0.97) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ============================================================
+   PANEL — Dark wood plaque
+   ============================================================ */
+.panel {
+    width: 900px;
+    max-width: 92vw;
+    max-height: 88vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    animation: panelIn 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+    padding: 24px 28px;
+    border-radius: 6px;
+
+    /* Dark wood texture */
+    background:
+        /* Subtle wood grain stripes */
+        repeating-linear-gradient(
+            91deg,
+            transparent 0px,
+            transparent 3px,
+            rgba(0, 0, 0, 0.08) 3px,
+            rgba(0, 0, 0, 0.08) 4px,
+            transparent 4px,
+            transparent 8px,
+            rgba(255, 200, 140, 0.015) 8px,
+            rgba(255, 200, 140, 0.015) 9px
+        ),
+        /* Soft warm spots */
+        radial-gradient(ellipse at 30% 20%, var(--bg-light) 0%, transparent 50%),
+        radial-gradient(ellipse at 75% 80%, var(--bg-mid) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 70%, var(--bg-base) 0%, transparent 60%),
+        /* Base */
+        linear-gradient(135deg, var(--bg-base) 0%, var(--bg-deep) 100%);
+
+    box-shadow:
+        inset 0 0 80px rgba(0, 0, 0, 0.7),
+        inset 0 0 20px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 200, 140, 0.05),
+        0 25px 80px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+/* ============================================================
+   DECORATIVE FRAME — Outer dashed border + corner brackets
+   ============================================================ */
+.frame {
+    position: absolute;
+    inset: 14px;
+    pointer-events: none;
+    z-index: 2;
+    border: 1px dashed var(--brass-dark);
+    border-radius: 4px;
+    opacity: 0.55;
+}
+
+/* Corner brackets (the elegant L shapes in the design) */
+.corner {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    z-index: 3;
+    pointer-events: none;
+}
+.corner::before,
+.corner::after {
+    content: '';
+    position: absolute;
+    background: var(--brass);
+    box-shadow: 0 0 4px rgba(232, 200, 144, 0.3);
+}
+.corner::before {
+    /* Horizontal arm */
+    width: 100%; height: 2px;
+}
+.corner::after {
+    /* Vertical arm */
+    width: 2px; height: 100%;
+}
+
+.corner.tl { top: 6px; left: 6px; }
+.corner.tl::before { top: 0; left: 0; }
+.corner.tl::after  { top: 0; left: 0; }
+
+.corner.tr { top: 6px; right: 6px; }
+.corner.tr::before { top: 0; right: 0; }
+.corner.tr::after  { top: 0; right: 0; }
+
+.corner.bl { bottom: 6px; left: 6px; }
+.corner.bl::before { bottom: 0; left: 0; }
+.corner.bl::after  { bottom: 0; left: 0; }
+
+.corner.br { bottom: 6px; right: 6px; }
+.corner.br::before { bottom: 0; right: 0; }
+.corner.br::after  { bottom: 0; right: 0; }
+
+/* Brass rivets in corners */
+.rivet {
+    position: absolute;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    z-index: 4;
+    background: radial-gradient(circle at 30% 30%,
+        var(--brass-glow) 0%,
+        var(--brass-bright) 30%,
+        var(--brass) 60%,
+        var(--brass-dark) 100%);
+    box-shadow:
+        inset 0 -1px 1px rgba(0, 0, 0, 0.5),
+        inset 0 1px 1px rgba(255, 230, 170, 0.5),
+        0 1px 2px rgba(0, 0, 0, 0.7);
+}
+.rivet.tl { top: 22px; left: 22px; }
+.rivet.tr { top: 22px; right: 22px; }
+.rivet.bl { bottom: 22px; left: 22px; }
+.rivet.br { bottom: 22px; right: 22px; }
+
+/* ============================================================
+   TITLEBAR — Hero header
+   ============================================================ */
+.titlebar {
+    position: relative;
+    padding: 32px 40px 24px;
+    text-align: center;
+    z-index: 5;
+}
+
+/* Small star at top */
+.title-star {
+    color: var(--brass-bright);
+    font-size: 14px;
+    margin-bottom: 12px;
+    text-shadow: 0 0 6px rgba(232, 200, 144, 0.5);
+}
+
+/* Tiny "D · B · G" prefix */
+.title-prefix {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--brass-bright);
+    letter-spacing: 14px;
+    padding-left: 14px; /* compensate for letter-spacing pulling left */
+    margin-bottom: 8px;
+    text-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.5),
+        0 0 8px rgba(232, 200, 144, 0.3);
+}
+
+/* MAIN TITLE — "ADMIN MENU" */
+.title {
+    font-family: 'Rye', serif;
+    font-size: 56px;
+    font-weight: 400;
+    letter-spacing: 4px;
+    line-height: 1;
+    color: var(--cream-bright);
+    text-shadow:
+        /* Deep shadow for depth */
+        0 2px 0 rgba(0, 0, 0, 0.4),
+        0 4px 0 rgba(0, 0, 0, 0.3),
+        0 8px 16px rgba(0, 0, 0, 0.6),
+        /* Subtle warm glow */
+        0 0 30px rgba(244, 232, 200, 0.15);
+}
+
+/* Italic subtitle "— Authority of the Frontier —" */
+.subtitle {
+    margin-top: 14px;
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--cream-dim);
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+}
+.subtitle::before { content: '— '; }
+.subtitle::after  { content: ' —'; }
+
+/* Diamond separator below subtitle */
+.diamond {
+    margin: 16px auto 0;
+    width: 8px;
+    height: 8px;
+    transform: rotate(45deg);
+    background: var(--brass);
+    box-shadow: 0 0 6px rgba(232, 200, 144, 0.4);
+}
+
+/* RANK badge */
+.rank-badge {
+    margin: 18px auto 0;
+    display: inline-block;
+    padding: 10px 28px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--brass);
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    color: var(--brass-bright);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5), 0 0 8px rgba(232, 200, 144, 0.3);
+    box-shadow:
+        inset 0 0 8px rgba(0, 0, 0, 0.4),
+        0 1px 2px rgba(0, 0, 0, 0.5);
+}
+.rank-badge::before { content: '★ '; color: var(--brass-bright); margin-right: 4px; }
+.rank-badge::after  { content: ' ★'; color: var(--brass-bright); margin-left: 4px; }
+
+/* ============================================================
+   SECTION HEADER (e.g. "Main Menu")
+   ============================================================ */
+.section-header {
+    margin: 8px 0 14px;
+    padding: 10px 18px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--brass-shadow);
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--cream-soft);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+    box-shadow:
+        inset 0 1px 2px rgba(0, 0, 0, 0.4),
+        inset 0 -1px 0 rgba(255, 200, 140, 0.05);
+}
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 18px 14px;
+    z-index: 1;
+    position: relative;
+}
+
+.content::-webkit-scrollbar { width: 10px; }
+.content::-webkit-scrollbar-track {
+    background: var(--bg-deepest);
+    border-radius: 0;
+}
+.content::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--brass-bright), var(--brass), var(--brass-dark));
+    border-radius: 2px;
+    border: 1px solid var(--brass-shadow);
+}
+
+/* ============================================================
+   SEARCH BOX
+   ============================================================ */
+.searchBox {
+    margin-bottom: 14px;
+    position: relative;
+}
+.searchBox input {
+    width: 100%;
+    padding: 11px 16px 11px 42px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--brass-shadow);
+    border-radius: 2px;
+    color: var(--cream);
+    font-family: 'IM Fell English', serif;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    outline: none;
+    transition: all 0.2s;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+.searchBox input::placeholder {
+    color: var(--cream-faded);
+    font-style: italic;
+}
+.searchBox input:focus {
+    border-color: var(--brass);
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.5),
+        0 0 0 1px var(--brass-dark),
+        0 0 12px rgba(184, 148, 90, 0.3);
+}
+.searchBox::before {
+    content: '⌕';
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--brass-bright);
+    font-size: 18px;
+    pointer-events: none;
+}
+
+/* ============================================================
+   MENU GRID — Two-column layout like the design
+   ============================================================ */
+.menuList {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.item {
+    position: relative;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    border-radius: 3px;
+    overflow: hidden;
+
+    /* Card background — slightly lighter than panel */
+    background:
+        linear-gradient(180deg, var(--bg-light) 0%, var(--bg-base) 100%);
+
+    border: 1px solid var(--brass-shadow);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 200, 140, 0.08),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+        0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Two small rivets on each card (top-left + bottom-right) */
+.item::before {
+    content: '';
+    position: absolute;
+    top: 5px; left: 5px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%,
+        var(--brass-bright) 0%,
+        var(--brass) 50%,
+        var(--brass-dark) 100%);
+    box-shadow: inset 0 -1px 1px rgba(0, 0, 0, 0.5), 0 1px 1px rgba(0, 0, 0, 0.6);
+    opacity: 0.7;
+}
+.item::after {
+    content: '';
+    position: absolute;
+    bottom: 5px; right: 5px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%,
+        var(--brass-bright) 0%,
+        var(--brass) 50%,
+        var(--brass-dark) 100%);
+    box-shadow: inset 0 -1px 1px rgba(0, 0, 0, 0.5), 0 1px 1px rgba(0, 0, 0, 0.6);
+    opacity: 0.7;
+}
+
+.item:hover {
+    background:
+        linear-gradient(180deg, var(--bg-lighter) 0%, var(--bg-light) 100%);
+    border-color: var(--brass);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 200, 140, 0.12),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+        0 4px 10px rgba(0, 0, 0, 0.6),
+        0 0 14px rgba(184, 148, 90, 0.15);
+    transform: translateY(-1px);
+}
+
+.itemTop {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.icon {
+    width: 36px; height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 22px;
+    background: transparent;
+}
+
+.itemContent {
+    flex: 1;
+    min-width: 0;
+}
+
+.itemTitle {
+    font-family: 'Rye', serif;
+    font-size: 17px;
+    color: var(--cream-bright);
+    letter-spacing: 1px;
+    line-height: 1.1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.itemDesc {
+    margin-top: 4px;
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--cream-dim);
+    line-height: 1.3;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* DANGER style — red close button */
+.item.danger {
+    background: linear-gradient(180deg, var(--crimson) 0%, var(--crimson-deep) 100%);
+    border-color: var(--crimson-bright);
+}
+.item.danger:hover {
+    background: linear-gradient(180deg, var(--crimson-bright) 0%, var(--crimson) 100%);
+    border-color: #c83830;
+}
+.item.danger .itemTitle { color: var(--cream-bright); }
+.item.danger .itemDesc { color: var(--cream-soft); }
+
+/* SUCCESS style */
+.item.success {
+    border-color: #6a8a3a;
+}
+.item.success:hover {
+    border-color: #8aaa5a;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--cream-faded);
+    font-style: italic;
+    font-family: 'IM Fell English', serif;
+    font-size: 16px;
+}
+
+/* ============================================================
+   FORM STYLES
+   ============================================================ */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 8px;
+}
+.formField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.formLabel {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brass-bright);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+}
+.formInput, .formSelect, .formTextarea {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--brass-shadow);
+    border-radius: 2px;
+    color: var(--cream);
+    font-family: 'IM Fell English', serif;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.2s;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+.formInput:focus, .formSelect:focus, .formTextarea:focus {
+    border-color: var(--brass);
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.5),
+        0 0 0 1px var(--brass-dark),
+        0 0 12px rgba(184, 148, 90, 0.3);
+}
+.formTextarea { resize: vertical; min-height: 90px; }
+.formSelect option { background: var(--bg-deep); color: var(--cream); }
+.formActions { display: flex; gap: 10px; margin-top: 6px; justify-content: flex-end; }
+
+/* ============================================================
+   BOTTOMBAR — Footer with hint
+   ============================================================ */
+.bottombar {
+    position: relative;
+    padding: 16px 20px 8px;
+    text-align: center;
+    z-index: 4;
+}
+
+.bottombar::before {
+    content: '✦';
+    display: block;
+    color: var(--brass);
+    font-size: 12px;
+    margin-bottom: 14px;
+    text-shadow: 0 0 6px rgba(184, 148, 90, 0.4);
+}
+
+.hint {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--cream-faded);
+    letter-spacing: 1px;
+}
+
+.hint .key {
+    display: inline-block;
+    padding: 2px 8px;
+    margin: 0 4px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--brass-dark);
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    color: var(--brass-bright);
+    letter-spacing: 1.5px;
+    font-style: normal;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.4);
+}
+
+.copyright {
+    margin-top: 8px;
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 11px;
+    color: var(--cream-faded);
+    letter-spacing: 1px;
+    opacity: 0.65;
+}
+
+/* ============================================================
+   BACK BUTTON
+   ============================================================ */
+.btn {
+    position: relative;
+    padding: 9px 22px;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--cream);
+    border-radius: 2px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    background: linear-gradient(180deg, var(--bg-light) 0%, var(--bg-base) 100%);
+    border: 1px solid var(--brass-shadow);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 200, 140, 0.1),
+        0 2px 4px rgba(0, 0, 0, 0.4);
+}
+.btn:hover {
+    background: linear-gradient(180deg, var(--bg-lighter) 0%, var(--bg-light) 100%);
+    border-color: var(--brass);
+    color: var(--brass-bright);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 200, 140, 0.15),
+        0 4px 8px rgba(0, 0, 0, 0.6),
+        0 0 12px rgba(184, 148, 90, 0.2);
+}
+.btn:active { transform: translateY(1px); }
+.btn.primary { border-color: var(--brass); color: var(--brass-bright); }
+.btn.primary:hover {
+    background: linear-gradient(180deg, #6a8a3a 0%, #3a5018 100%);
+    color: var(--cream-bright);
+}
+
+.actionBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding: 0 4px;
+}
+
+</style>
+</head>
+<body>
+  <div id="wrap">
+    <div class="panel">
+      <div class="frame"></div>
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+      <div class="rivet tl"></div>
+      <div class="rivet tr"></div>
+      <div class="rivet bl"></div>
+      <div class="rivet br"></div>
+
+      <div class="titlebar">
+        <div class="title-star">★</div>
+        <div class="title-prefix">D · B · G</div>
+        <div class="title" id="menuTitle">ADMIN MENU</div>
+        <div class="subtitle" id="menuSubtitle">Authority of the Frontier</div>
+        <div class="diamond"></div>
+        <div class="rank-badge" id="rankBadge">RANK: GOD</div>
+      </div>
+
+      <div class="content" id="content"></div>
+
+      <div class="bottombar">
+        <div class="actionBar" id="actionBar" style="display:none;">
+          <button class="btn" id="btnBack">◀ Back</button>
+        </div>
+        <div class="hint" id="menuHint">
+          Press <span class="key">ESC</span> or <span class="key">Page Up</span> to Close
+        </div>
+        <div class="copyright">© 1899 · DBG Productions · All Rights Reserved</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const resource = GetParentResourceName();
+
+function postNui(action, data = {}) {
+    fetch(`https://${resource}/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+        body: JSON.stringify(data)
+    }).catch(() => {});
+}
+
+const wrap       = document.getElementById('wrap');
+const titleEl    = document.getElementById('menuTitle');
+const subtitleEl = document.getElementById('menuSubtitle');
+const contentEl  = document.getElementById('content');
+const backBtn    = document.getElementById('btnBack');
+const actionBar  = document.getElementById('actionBar');
+const hintEl     = document.getElementById('menuHint');
+const rankBadge  = document.getElementById('rankBadge');
+
+function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, m => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    })[m]);
+}
+
+function iconHtml(icon) {
+    if (!icon) return '';
+    return `<span>${escapeHtml(icon)}</span>`;
+}
+
+let allItems = [];
+
+function renderItems(items) {
+    const list = document.createElement('div');
+    list.className = 'menuList';
+
+    if (!items || items.length === 0) {
+        list.innerHTML = '<div class="empty">— No entries —</div>';
+        return list;
+    }
+
+    for (const it of items) {
+        const el = document.createElement('div');
+        el.className = 'item' + (it.style ? ' ' + it.style : '');
+        el.innerHTML = `
+            <div class="itemTop">
+                <div class="icon">${iconHtml(it.icon)}</div>
+                <div class="itemContent">
+                    <div class="itemTitle">${escapeHtml(it.title)}</div>
+                    ${it.description ? `<div class="itemDesc">${escapeHtml(it.description)}</div>` : ''}
+                </div>
+            </div>
+        `;
+        el.addEventListener('click', () => postNui('selectItem', { id: it.id }));
+        list.appendChild(el);
+    }
+    return list;
+}
+
+function renderSearchableMenu(items) {
+    contentEl.innerHTML = '';
+    allItems = items;
+
+    const searchBox = document.createElement('div');
+    searchBox.className = 'searchBox';
+    searchBox.innerHTML = `<input type="text" id="searchInput" placeholder="Search..." autocomplete="off" />`;
+    contentEl.appendChild(searchBox);
+
+    const listContainer = document.createElement('div');
+    listContainer.id = 'listContainer';
+    contentEl.appendChild(listContainer);
+    listContainer.appendChild(renderItems(items));
+
+    const input = document.getElementById('searchInput');
+    input.focus();
+    input.addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase();
+        const filtered = allItems.filter(it =>
+            (it.title || '').toLowerCase().includes(q) ||
+            (it.description || '').toLowerCase().includes(q)
+        );
+        listContainer.innerHTML = '';
+        listContainer.appendChild(renderItems(filtered));
+    });
+}
+
+function renderMenu(items) {
+    contentEl.innerHTML = '';
+    contentEl.appendChild(renderItems(items));
+}
+
+function renderForm(form) {
+    contentEl.innerHTML = '';
+    const formEl = document.createElement('div');
+    formEl.className = 'form';
+
+    const fieldRefs = [];
+
+    for (const f of form.fields) {
+        const wrap = document.createElement('div');
+        wrap.className = 'formField';
+
+        const label = document.createElement('label');
+        label.className = 'formLabel';
+        label.textContent = f.label;
+        wrap.appendChild(label);
+
+        let input;
+        if (f.type === 'textarea') {
+            input = document.createElement('textarea');
+            input.className = 'formTextarea';
+            input.placeholder = f.placeholder || '';
+            if (f.default !== undefined && f.default !== null) input.value = f.default;
+        } else if (f.type === 'select') {
+            input = document.createElement('select');
+            input.className = 'formSelect';
+            for (const opt of (f.options || [])) {
+                const o = document.createElement('option');
+                o.value = opt.value;
+                o.textContent = opt.label;
+                if (f.default === opt.value) o.selected = true;
+                input.appendChild(o);
+            }
+        } else {
+            input = document.createElement('input');
+            input.className = 'formInput';
+            input.type = f.type || 'text';
+            input.placeholder = f.placeholder || '';
+            if (f.default !== undefined && f.default !== null) input.value = f.default;
+            if (f.min !== undefined) input.min = f.min;
+            if (f.max !== undefined) input.max = f.max;
+        }
+
+        input.dataset.key = f.key;
+        wrap.appendChild(input);
+        formEl.appendChild(wrap);
+        fieldRefs.push({ key: f.key, el: input, type: f.type });
+    }
+
+    const actions = document.createElement('div');
+    actions.className = 'formActions';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn';
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.onclick = () => postNui('formCancel', { id: form.id });
+    actions.appendChild(cancelBtn);
+
+    const submitBtn = document.createElement('button');
+    submitBtn.className = 'btn primary';
+    submitBtn.textContent = form.submitLabel || 'Submit';
+    submitBtn.onclick = () => {
+        const result = {};
+        for (const f of fieldRefs) {
+            let val = f.el.value;
+            if (f.type === 'number') val = val === '' ? null : Number(val);
+            result[f.key] = val;
+        }
+        postNui('formSubmit', { id: form.id, values: result });
+    };
+    actions.appendChild(submitBtn);
+
+    formEl.appendChild(actions);
+    contentEl.appendChild(formEl);
+
+    if (fieldRefs.length > 0) fieldRefs[0].el.focus();
+}
+
+window.addEventListener('message', (event) => {
+    const data = event.data;
+    if (!data || !data.action) return;
+
+    if (data.action === 'openMenu') {
+        titleEl.textContent    = (data.title || 'ADMIN MENU').toUpperCase();
+        subtitleEl.textContent = data.subtitle || 'Authority of the Frontier';
+        actionBar.style.display = data.showBack ? 'flex' : 'none';
+
+        if (data.searchable) {
+            renderSearchableMenu(data.items || []);
+        } else {
+            renderMenu(data.items || []);
+        }
+
+        wrap.classList.add('show');
+    }
+
+    if (data.action === 'openForm') {
+        titleEl.textContent    = (data.title || 'ADMIN MENU').toUpperCase();
+        subtitleEl.textContent = data.subtitle || 'Authority of the Frontier';
+        actionBar.style.display = data.showBack ? 'flex' : 'none';
+        renderForm(data.form);
+        wrap.classList.add('show');
+    }
+
+    if (data.action === 'closeMenu') {
+        wrap.classList.remove('show');
+    }
+});
+
+backBtn.addEventListener('click', () => postNui('back', {}));
+
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') postNui('close', {});
+});
+</script>
+</body>
+</html>
